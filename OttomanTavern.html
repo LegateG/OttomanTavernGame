@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Late Ottoman Tavern: The Social Drink Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #f3eade; /* Soft, warm beige */
+            --container-bg-color: #fbf8f3;
+            --main-text-color: #4a3f35; /* Dark, earthy brown */
+            --primary-color: #8c5b40; /* A rich, warm brown */
+            --accent-color: #b58c5f; /* A lighter, golden brown */
+            --button-bg-color: #6d8b74; /* A muted, sage green */
+            --button-hover-color: #556f5d; /* Darker sage */
+            --correct-bg: #eaf0e6;
+            --correct-border: #6d8b74;
+            --incorrect-bg: #f5e8e6;
+            --incorrect-border: #a96e5b; /* A terracotta red */
+            --progress-bar-bg: #dcd0b9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--main-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+
+        .game-container {
+            background-color: var(--container-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+            border: 1px solid #dcd0b9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        #gamePlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .question-container {
+            width: 100%;
+        }
+
+        .scenario-box {
+            background-color: #fdfaf0;
+            border: 1px solid #d4c7b8;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.1em;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: left;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .drink-button {
+            background-color: #fff;
+            border: 3px solid var(--accent-color);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drink-button:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background-color: #fdfaf0;
+        }
+
+        .drink-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .drink-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .drink-image {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 8px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .drink-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .feedback-box {
+            display: none;
+        }
+
+        .score-box {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .control-buttons button {
+            background-color: var(--button-bg-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* MODIFIED: Increased margin for more spacing */
+            margin: 5px 15px;
+            font-weight: 600;
+        }
+        
+        /* NEW: Style for the larger start button */
+        #startButton {
+            padding: 20px 40px;
+            font-size: 1.4em;
+            font-weight: 700;
+            background-color: var(--primary-color);
+        }
+        
+        #startButton:hover {
+            background-color: var(--accent-color);
+        }
+
+
+        .control-buttons button:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-2px);
+        }
+
+        .control-buttons button:active {
+            transform: translateY(0);
+        }
+
+        .start-screen, .end-screen {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            min-height: 350px;
+            width: 100%;
+            margin: 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        #audio-overview-text, #generation-feedback {
+            margin-top: 20px;
+            background-color: #fdfaf0;
+            border: 1px solid #d4c7b8;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.95em;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-content.correct {
+            border-color: var(--correct-border);
+            background-color: var(--correct-bg);
+            color: var(--button-hover-color);
+        }
+
+        .modal-content.incorrect {
+            border-color: var(--incorrect-border);
+            background-color: var(--incorrect-bg);
+            color: var(--incorrect-border);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: inherit;
+        }
+
+        .modal-content p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: inherit;
+        }
+
+        .modal-content button {
+            background-color: var(--button-bg-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-content button:hover {
+            background-color: var(--button-hover-color);
+        }
+        
+        /* NEW: Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            background-color: var(--progress-bar-bg);
+            border-radius: 10px;
+            height: 30px;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            transition: width 0.4s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .scenario-box, .score-box {
+                font-size: 1em;
+            }
+            .drink-button {
+                min-height: 120px;
+                padding: 10px;
+            }
+            .drink-image {
+                width: 50px;
+                height: 50px;
+            }
+            .drink-name {
+                font-size: 1em;
+            }
+            .control-buttons button {
+                font-size: 1em;
+                padding: 10px 20px;
+                margin: 5px;
+            }
+            #startButton {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .options-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            .modal-content {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Late Ottoman Tavern: The Social Drink Game</h1>
+
+        <div class="start-screen" id="startScreen">
+            <h2>Welcome to the Ottoman Tavern!</h2>
+            <p>In this game, you'll be presented with various social scenarios from the late Ottoman Empire. Your task is to choose the most appropriate drink for each situation, considering the cultural norms, social settings, and historical context of the time.</p>
+            <div>
+                <button class="control-buttons" id="startButton">Start Game</button>
+            </div>
+            <div>
+                <button class="control-buttons" id="audioOverviewButton">Audio Overview</button>
+                <button class="control-buttons" id="generateScenarioButton">✨ Generate New Scenario</button>
+            </div>
+            <div id="audio-overview-text"></div>
+            <div id="generation-feedback"></div>
+        </div>
+
+        <div id="gamePlay" style="display: none;">
+            <!-- NEW: Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+
+            <div class="question-container">
+                <div class="scenario-box" id="scenarioText"></div>
+                <div class="options-grid" id="drinkOptions"></div>
+            </div>
+
+            <div class="feedback-box" id="feedback"></div>
+
+            <div class="score-box">
+                Score: <span id="score">0</span> / <span id="totalScenarios">0</span>
+            </div>
+
+            <div class="control-buttons">
+                <button id="restartButton" style="display: none;">Restart Game</button>
+                <button id="returnToStartButton" style="display: none;">Return to Start</button>
+            </div>
+        </div>
+
+        <div class="end-screen" id="endScreen" style="display: none;">
+            <h2>Game Over!</h2>
+            <p>You've completed all scenarios. Your final score is: <span id="finalScore"></span></p>
+            <button class="control-buttons" id="playAgainButton">Play Again</button>
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalFeedbackTitle"></h3>
+            <p id="modalFeedbackText"></p>
+            <button id="modalNextButton">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Define initial scenarios
+        const initialScenarios = [
+            { description: "You are a non-Muslim merchant in Galata, celebrating a successful trade deal with your business partners. You want to offer a traditional and widely accepted drink among your community.", correctDrinks: ["Wine", "Rakı"] },
+            { description: "It's a quiet evening in a Muslim notable's mansion in Ankara. You are invited to a private gathering in a men's reserved room, where discretion is key.", correctDrinks: ["Wine", "Boza"] },
+            { description: "You are a Young Ottoman intellectual, meeting friends in a bustling Istanbul coffeehouse. You want a drink that facilitates conversation but doesn't cause overt intoxication, reflecting a modern, yet somewhat reserved, sensibility.", correctDrinks: ["Boza"] },
+            { description: "You're at a lively tavern in Pera, a fashionable district influenced by Western culture. You want to enjoy a drink that symbolizes an elegant, modern European lifestyle.", correctDrinks: ["Wine"] },
+            { description: "It's the late 19th century, and you're a Muslim urban middle-class individual. You're exploring new forms of sociability in a tavern, and you want to try a spirit that is gaining popularity and becoming a 'national' symbol.", correctDrinks: ["Rakı"] },
+            { description: "You are a soldier in the Ottoman Balkans, looking for a strong, easily produced, and transportable spirit.", correctDrinks: ["Brandy"] },
+            { description: "You are attending a wedding ceremony where alcohol is part of the celebration, and you want a drink that is customary for such communal gatherings.", correctDrinks: ["Wine", "Rakı"] },
+            { description: "You are a reformist intellectual, concerned about the 'Western vices' entering Ottoman society. You observe young men drinking a newly introduced, 'alien' beverage, which you believe signifies societal backwardness.", correctDrinks: ["Beer"] },
+            { description: "You are an official in Sultan Abdülhamid II's court, where despite the Sultan's pious image, drinking is a daily practice. You want a drink that is common in court circles.", correctDrinks: ["Wine", "Rakı", "Brandy"] },
+            { description: "It's the occupation era in Istanbul (1918-1923), and you are an Allied serviceman looking for a widely available drink in the city's revived nightlife establishments.", correctDrinks: ["Wine", "Rakı", "Beer", "Brandy"] }
+        ];
+
+        let scenarios = [...initialScenarios];
+        
+        const drinkImages = {
+            "Wine": "https://d1nhio0ox7pgb.cloudfront.net/_img/g_collection_png/standard/256x256/wine.png?w=400&h=400&fit=crop&crop=center",
+            "Rakı": "https://upload.wikimedia.org/wikipedia/commons/0/04/Rak%C4%B1.jpg?w=400&h=400&fit=crop&crop=center",
+            "Boza": "https://www.shutterstock.com/shutterstock/photos/1036861861/display_1500/stock-vector-boza-and-roasted-chickpeas-on-blue-background-hand-drawn-vector-illustration-eps-1036861861.jpg?w=400&h=400&fit=crop&crop=center",
+            "Beer": "https://i5.walmartimages.com/asr/47e195ab-242f-4afe-93ba-fea61edc38ed.ff87351b8f52114ff8bfc4ec4cbf421c.jpeg?w=400&h=400&fit=crop&crop=center",
+            "Brandy": "https://www.nicepng.com/png/detail/763-7636401_fine-scotch-brandy-glass-with-ice.png?w=400&h=400&fit=crop&crop=center"
+        };
+
+        const allDrinks = ["Wine", "Rakı", "Boza", "Beer", "Brandy"];
+
+        let currentScenarioIndex = 0;
+        let score = 0;
+        let gameStarted = false;
+
+        // DOM Elements
+        const startScreen = document.getElementById('startScreen');
+        const gamePlay = document.getElementById('gamePlay');
+        const endScreen = document.getElementById('endScreen');
+        const startButton = document.getElementById('startButton');
+        const audioOverviewButton = document.getElementById('audioOverviewButton');
+        const generateScenarioButton = document.getElementById('generateScenarioButton');
+        const audioOverviewText = document.getElementById('audio-overview-text');
+        const generationFeedback = document.getElementById('generation-feedback');
+        const scenarioText = document.getElementById('scenarioText');
+        const drinkOptions = document.getElementById('drinkOptions');
+        const scoreDisplay = document.getElementById('score');
+        const totalScenariosDisplay = document.getElementById('totalScenarios');
+        const restartButton = document.getElementById('restartButton');
+        const returnToStartButton = document.getElementById('returnToStartButton');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const modalFeedbackTitle = document.getElementById('modalFeedbackTitle');
+        const modalFeedbackText = document.getElementById('modalFeedbackText');
+        const modalNextButton = document.getElementById('modalNextButton');
+        
+        // NEW: Progress Bar Elements
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initializeGame() {
+            scenarios = [...initialScenarios];
+            shuffleArray(scenarios);
+            currentScenarioIndex = 0;
+            score = 0;
+            totalScenariosDisplay.textContent = scenarios.length;
+            scoreDisplay.textContent = score;
+            restartButton.style.display = 'none';
+            returnToStartButton.style.display = 'none';
+            gameStarted = true;
+            startScreen.style.display = 'none';
+            gamePlay.style.display = 'flex';
+            endScreen.style.display = 'none';
+            progressContainer.style.display = 'block'; // Show progress bar
+            loadScenario();
+        }
+
+        function loadScenario() {
+            if (currentScenarioIndex < scenarios.length) {
+                updateProgressBar(); // Update progress bar for the new scenario
+                const currentScenario = scenarios[currentScenarioIndex];
+                scenarioText.textContent = currentScenario.description;
+                drinkOptions.innerHTML = '';
+                
+                feedbackModal.style.display = 'none';
+                modalFeedbackTitle.textContent = '';
+                modalFeedbackText.textContent = '';
+                feedbackModal.querySelector('.modal-content').classList.remove('correct', 'incorrect');
+
+                returnToStartButton.style.display = 'block';
+
+                allDrinks.forEach(drink => {
+                    const button = document.createElement('div');
+                    button.classList.add('drink-button');
+                    button.onclick = () => checkAnswer(drink, currentScenario.correctDrinks);
+                    
+                    const img = document.createElement('img');
+                    img.src = drinkImages[drink];
+                    img.alt = drink;
+                    img.classList.add('drink-image');
+                    
+                    const name = document.createElement('div');
+                    name.textContent = drink;
+                    name.classList.add('drink-name');
+                    
+                    button.appendChild(img);
+                    button.appendChild(name);
+                    drinkOptions.appendChild(button);
+                });
+            } else {
+                endGame();
+            }
+        }
+
+        function checkAnswer(chosenDrink, correctDrinks) {
+            Array.from(drinkOptions.children).forEach(button => {
+                button.style.pointerEvents = 'none';
+                button.style.opacity = '0.6';
+            });
+
+            let isCorrect = correctDrinks.includes(chosenDrink);
+            let feedbackTitle = "";
+            let feedbackMessage = "";
+            let modalContent = feedbackModal.querySelector('.modal-content');
+
+            if (isCorrect) {
+                feedbackTitle = "Excellent choice!";
+                feedbackMessage = "This drink fits the setting perfectly.";
+                modalContent.classList.add('correct');
+                score++;
+            } else {
+                feedbackTitle = "Not quite.";
+                feedbackMessage = `The best choices here would be: ${correctDrinks.join(', ')}.`;
+                modalContent.classList.add('incorrect');
+            }
+            scoreDisplay.textContent = score;
+
+            modalFeedbackTitle.textContent = feedbackTitle;
+            modalFeedbackText.textContent = feedbackMessage;
+            feedbackModal.style.display = 'flex';
+            
+            restartButton.style.display = 'inline-block';
+            returnToStartButton.style.display = 'inline-block';
+        }
+
+        function nextScenario() {
+            feedbackModal.style.display = 'none';
+            currentScenarioIndex++;
+            loadScenario();
+        }
+
+        function endGame() {
+            gamePlay.style.display = 'none';
+            endScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = `${score} / ${scenarios.length}`;
+            progressContainer.style.display = 'none'; // Hide progress bar at the end
+        }
+
+        function returnToStartScreen() {
+            gamePlay.style.display = 'none';
+            endScreen.style.display = 'none';
+            startScreen.style.display = 'flex';
+            feedbackModal.style.display = 'none';
+            progressContainer.style.display = 'none'; // Hide progress bar
+            gameStarted = false;
+        }
+        
+        // NEW: Function to update the progress bar
+        function updateProgressBar() {
+            const progressPercent = Math.round((currentScenarioIndex / scenarios.length) * 100);
+            progressBar.style.width = `${progressPercent}%`;
+            progressText.textContent = `${progressPercent}%`;
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', initializeGame);
+        modalNextButton.addEventListener('click', nextScenario);
+        restartButton.addEventListener('click', initializeGame);
+        playAgainButton.addEventListener('click', initializeGame);
+        returnToStartButton.addEventListener('click', returnToStartScreen);
+
+        // ... (rest of the script for API calls remains the same)
+        audioOverviewButton.addEventListener('click', async () => {
+            audioOverviewButton.disabled = true;
+            audioOverviewButton.textContent = 'Generating...';
+            audioOverviewText.textContent = 'Generating audio overview...';
+            audioOverviewText.style.display = 'block';
+            generationFeedback.style.display = 'none';
+
+            try {
+                let chatHistory = [];
+                const prompt = "Provide a brief audio overview script for a game about choosing the correct drink for social settings in a late Ottoman cosmopolitan tavern. Focus on the game's premise and what the player will experience. Keep it concise, around 100-150 words.";
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "" // API key will be provided in the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0]?.content?.parts[0]) {
+                    audioOverviewText.textContent = result.candidates[0].content.parts[0].text;
+                } else {
+                    audioOverviewText.textContent = 'Failed to generate audio overview. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating audio overview:', error);
+                audioOverviewText.textContent = 'An error occurred while generating the audio overview.';
+            } finally {
+                audioOverviewButton.disabled = false;
+                audioOverviewButton.textContent = 'Audio Overview';
+            }
+        });
+
+        generateScenarioButton.addEventListener('click', async () => {
+            generateScenarioButton.disabled = true;
+            generateScenarioButton.textContent = 'Generating...';
+            generationFeedback.textContent = 'Generating a new scenario...';
+            generationFeedback.style.display = 'block';
+            audioOverviewText.style.display = 'none';
+
+            try {
+                let chatHistory = [];
+                const prompt = `Generate a new social scenario for a game set in the late Ottoman cosmopolitan tavern. The scenario should describe a social setting and require the player to choose the most appropriate drink from the following list: ${allDrinks.join(', ')}. Provide the output in JSON format with two fields: "description" (string) and "correctDrinks" (array of strings, containing one or more correct drinks from the provided list). Ensure the scenario is historically plausible and culturally sensitive for the late Ottoman period.`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "description": { "type": "STRING" },
+                                "correctDrinks": {
+                                    "type": "ARRAY",
+                                    "items": { "type": "STRING" }
+                                }
+                            },
+                            "propertyOrdering": ["description", "correctDrinks"]
+                        }
+                    }
+                };
+                const apiKey = "" // API key will be provided in the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0]?.content?.parts[0]) {
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    const newScenario = JSON.parse(jsonText);
+
+                    const isValid = newScenario.description &&
+                                      Array.isArray(newScenario.correctDrinks) &&
+                                      newScenario.correctDrinks.every(drink => allDrinks.includes(drink));
+
+                    if (isValid) {
+                        initialScenarios.push(newScenario); // Add to the master list
+                        generationFeedback.textContent = 'New scenario added! It will be included next time you start a game.';
+                    } else {
+                        generationFeedback.textContent = 'Generated scenario was invalid. Please try again.';
+                        console.error('Invalid scenario generated:', newScenario);
+                    }
+                } else {
+                    generationFeedback.textContent = 'Failed to generate scenario. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating scenario:', error);
+                generationFeedback.textContent = 'An error occurred while generating the scenario.';
+            } finally {
+                generateScenarioButton.disabled = false;
+                generateScenarioButton.textContent = '✨ Generate New Scenario';
+            }
+        });
+
+        window.onload = function() {
+            startScreen.style.display = 'flex';
+            gamePlay.style.display = 'none';
+            endScreen.style.display = 'none';
+            totalScenariosDisplay.textContent = initialScenarios.length;
+        };
+    </script>
+</body>
+</html>
